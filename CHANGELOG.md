@@ -7,3 +7,6 @@
 ## v1.1.0
 - Bug fixes: End If on constructor, breaking lines
 - Attributes list generation script
+
+## v1.1.1
+- Bug fixes: Const properties weren't considerated for getters

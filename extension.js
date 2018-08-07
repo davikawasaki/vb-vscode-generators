@@ -121,7 +121,7 @@ function _extractPropertiesArray(props) {
         let words = p.split(" ").map(x => x.replace('\r\n', ''));
         
         // if words > 7 (i.e ["Private", "Const", "p_*", "As", "Integer", "=", "0"];)
-        if (words.length > 7) {
+        if (words.length >= 7) {
             propObj.type = words[4];
             propObj.attribute = words[2];
 
