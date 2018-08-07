@@ -1,8 +1,9 @@
 {
     "name": "VBGenerators",
-    "displayName": "Getter and Setter´and Constructors Generator for VB",
-    "description": "This extension generate VB constructors, getters and setters from the class variable declarations.",
+    "displayName": "Getters, Setters and Constructors' Generator for VB",
+    "description": "This extension generate VB constructors, getters and setters from a class attributes.",
     "version": "1.0.0",
+    "icon": "images/logo.png",
     "publisher": "davikawasaki",
     "repository": 
     {

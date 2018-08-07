@@ -68,8 +68,8 @@ function activate(context) {
     context.subscriptions.push(disposableConstructors);
 }
 
-function toPascalCase(str) {
-    return str.replace(/\w+/g,w => w[0].toUpperCase() + w.slice(1).toLowerCase());
+function _transformFirstCharToUpperCase(s) {
+    return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 function _extractPropertiesArray(props) {
@@ -131,7 +131,9 @@ function createGetterAndSetter(propsText) {
     var properties = propsText.split('\r\n').filter(x => x.length > 2);
     var propList = _extractPropertiesArray(properties);
 
-    var generatedCode = ``;
+    var generatedCode = 
+`
+`;
     var errorMessage = `Something went wrong (fix them before proceeding) in the following lines: `;
     var errorList = propList.filter(p => !p.createStatus);
 
@@ -145,31 +147,30 @@ function createGetterAndSetter(propsText) {
         for (let p of propList) {
             let rawAttribute = p.attribute.split('_')[1]
             if (rawAttribute) {
-                let RawAttribute = toPascalCase(rawAttribute);
                 let code = 
-                    `
-                    \t''''''''''''''''''''''
-                    \t' get${RawAttribute}() property
-                    \t''''''''''''''''''''''
-                    \tPublic Property Get get${rawAttribute}() As ${p.type}
-                    \t\t${rawAttribute} = ${p.attribute}
-                    \tEnd Property
-                    `;
+`
+''''''''''''''''''''''
+' ${_transformFirstCharToUpperCase(rawAttribute)} property
+''''''''''''''''''''''
+Public Property Get ${rawAttribute}() As ${p.type}
+\t${rawAttribute} = ${p.attribute}
+End Property
+`;
                 generatedCode += code;
     
                 if (!p.constStatus) {
                     let code = 
-                        `
-                        \tPublic Property Let ${p.attribute}(value As ${p.type})
-                        \t\t${p.attribute} = value;
-                        \tEnd Property
-                        `;
-    
+`
+Public Property Let ${rawAttribute}(value As ${p.type})
+\t${p.attribute} = value;
+End Property
+`;
+
                     generatedCode += code;
                 }
             }
             else {
-                vscode.window.showErrorMessage('Something went wrong! Try that all properties name are in this format: "p_******"');
+                vscode.window.showErrorMessage('Something went wrong! All properties name has to start with a p_! Change ' + p.attribute + ' to p_ATTRIBUTENAME.');
             }
         }
     }
@@ -181,7 +182,10 @@ function createConstructor(propsText) {
     var properties = propsText.split('\r\n').filter(x => x.length > 2);
     var propList = _extractPropertiesArray(properties);
 
-    var generatedCode = ``;
+    var generatedCode = 
+`
+`;
+
     var errorMessage = `Something went wrong (fix them before proceeding) in the following lines: `;
     var errorList = propList.filter(p => !p.createStatus);
 
@@ -192,51 +196,64 @@ function createConstructor(propsText) {
         vscode.window.showErrorMessage(errorMessage);
     }
     else {
+        let codeHeader = '';
+
+        for (let i = 0; i < propList.length; i++) {
+            if (!propList[i].constStatus) {
+                let rawAttribute = propList[i].attribute.split('_')[1]
+                if (rawAttribute) {
+                    codeHeader += `a${_transformFirstCharToUpperCase(rawAttribute)} As ${propList[i].type}`;
+                    if (i !== propList.length - 1) codeHeader += ', ';
+                }
+                else {
+                    vscode.window.showErrorMessage('Something went wrong! All properties name has to start with a p_! Change ' + propList[i].attribute + ' to p_ATTRIBUTENAME.');
+                }
+            }
+        }
+        
         let codeSignature = 
-            `
-            \t'Public Sub Init(
-            `;
+`
+Public Sub Init(${codeHeader})
+`;
         let codeBody =
-            ``;
+``;
         for (let p of propList) {
             if (!p.constStatus) {
                 let rawAttribute = p.attribute.split('_')[1]
                 if (rawAttribute) {
-                    let RawAttribute = toPascalCase(rawAttribute);
                     let codeInnerBody = ``;
     
                     if (p.type == 'Integer' || p.type == 'Double' || p.type == 'Long') {
                         codeInnerBody = 
-                        `
-                        \tIf ${p.attribute} = 0 Then
-                        \t${p.attribute} = a${RawAttribute}
-                        `;
+`\tIf ${p.attribute} = 0 Then
+\t\t${p.attribute} = a${_transformFirstCharToUpperCase(rawAttribute)}
+`;
                     }
                     else if (p.type == 'String') {
                         codeInnerBody = 
-                        `
-                        \tIf ${p.attribute} <> "" Then
-                        \t${p.attribute} = a${RawAttribute}
-                        `;
+`\tIf ${p.attribute} <> "" Then
+\t\t${p.attribute} = a${_transformFirstCharToUpperCase(rawAttribute)}
+`;
                     }
                     // Variant types
                     else {
                         codeInnerBody = 
-                        `
-                        \tIf isEmpty(${p.attribute}) Then
-                        \t${p.attribute} = a${RawAttribute}
-                        `;
+`\tIf isEmpty(${p.attribute}) Then
+\t\t${p.attribute} = a${_transformFirstCharToUpperCase(rawAttribute)}
+`;
                     }
                     
                     codeBody += codeInnerBody;
                 }
                 else {
-                    vscode.window.showErrorMessage('Something went wrong! Try that all properties name are in this format: "p_******"');
+                    vscode.window.showErrorMessage('Something went wrong! All properties name has to start with a p_! Change ' + p.attribute + ' to p_ATTRIBUTENAME.');
                 }
             }
         }
 
-        generatedCode += codeSignature + codeBody + `\tEnd Sub`;
+        let codeFooter = 
+`End Sub`;
+        generatedCode += codeSignature + codeBody + codeFooter;
             
     }
 
