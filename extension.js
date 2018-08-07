@@ -64,8 +64,40 @@ function activate(context) {
         }
     });
 
+    let disposableAttributesList = vscode.commands.registerCommand('extension.generateVBAttributesList', function () {
+        var editor = vscode.window.activeTextEditor;
+        if (!editor)
+            return; // No open text editor
+
+        var selection = editor.selection;
+        var text = editor.document.getText(selection);
+
+        if (text.length < 1) {
+            vscode.window.showErrorMessage('No selected properties.');
+            return;
+        }
+
+        try {
+            var attrList = createAttributesList(text);
+
+            editor.edit(
+                edit => editor.selections.forEach(
+                  selection => 
+                  {
+                    edit.insert(selection.end, attrList);
+                  }
+                )
+              );
+        } 
+        catch (error) {
+            console.log(error);
+            vscode.window.showErrorMessage('Something went wrong! Try that the properties are in this format: "Private p_**** As String"');
+        }
+    });
+
     context.subscriptions.push(disposableGS);
     context.subscriptions.push(disposableConstructors);
+    context.subscriptions.push(disposableAttributesList);
 }
 
 function _transformFirstCharToUpperCase(s) {
@@ -88,8 +120,8 @@ function _extractPropertiesArray(props) {
 
         let words = p.split(" ").map(x => x.replace('\r\n', ''));
         
-        // if words == ["Private", "Const", "p_*", "As", "Integer", "=", "0"];
-        if (words.length == 7) {
+        // if words > 7 (i.e ["Private", "Const", "p_*", "As", "Integer", "=", "0"];)
+        if (words.length > 7) {
             propObj.type = words[4];
             propObj.attribute = words[2];
 
@@ -121,6 +153,11 @@ function _extractPropertiesArray(props) {
             propObj.errorLine = p;
         }
 
+        // Checking for Variant arrays (can't be edited by force, only on initialization - i.e native method 'Private Sub class_initialize()')
+        words.forEach(w => {
+            if (w.indexOf("()") !== -1) propObj.constStatus = true;
+        });
+
         extProps.push(propObj);
     }
 
@@ -145,8 +182,11 @@ function createGetterAndSetter(propsText) {
     }
     else {
         for (let p of propList) {
-            let rawAttribute = p.attribute.split('_')[1]
+            let rawAttribute = p.attribute.split('_')[1];
             if (rawAttribute) {
+                // Removal of variant arrays parenthesis
+                if (rawAttribute.indexOf("()") !== -1) rawAttribute = rawAttribute.replace("()", "");
+                if (p.attribute.indexOf("()") !== -1) p.attribute = p.attribute.replace("()", "");
                 let code = 
 `
 ''''''''''''''''''''''
@@ -162,7 +202,7 @@ End Property
                     let code = 
 `
 Public Property Let ${rawAttribute}(value As ${p.type})
-\t${p.attribute} = value;
+\t${p.attribute} = value
 End Property
 `;
 
@@ -198,15 +238,30 @@ function createConstructor(propsText) {
     else {
         let codeHeader = '';
 
-        for (let i = 0; i < propList.length; i++) {
+        for (var i = 0, j = 0; i < propList.length; i++, j++) {
             if (!propList[i].constStatus) {
                 let rawAttribute = propList[i].attribute.split('_')[1]
                 if (rawAttribute) {
                     codeHeader += `a${_transformFirstCharToUpperCase(rawAttribute)} As ${propList[i].type}`;
-                    if (i !== propList.length - 1) codeHeader += ', ';
+                    if (i !== propList.length - 1) {
+                        codeHeader += ', ';
+                        // Breaking lines (VB editor in excel has character limits)
+                        if (j == 10) {
+                            j = 0;
+                            codeHeader +=
+` _ 
+`;
+                        }
+                    }
                 }
                 else {
                     vscode.window.showErrorMessage('Something went wrong! All properties name has to start with a p_! Change ' + propList[i].attribute + ' to p_ATTRIBUTENAME.');
+                }
+            }
+            else {
+                // Remove unnecessary comma and space
+                if (i == propList.length - 1) {
+                    if (codeHeader.substr(codeHeader.length - 2) == ", ") codeHeader = codeHeader.slice(0, codeHeader.length - 2);
                 }
             }
         }
@@ -227,12 +282,14 @@ Public Sub Init(${codeHeader})
                         codeInnerBody = 
 `\tIf ${p.attribute} = 0 Then
 \t\t${p.attribute} = a${_transformFirstCharToUpperCase(rawAttribute)}
+\tEnd If
 `;
                     }
                     else if (p.type == 'String') {
                         codeInnerBody = 
 `\tIf ${p.attribute} <> "" Then
 \t\t${p.attribute} = a${_transformFirstCharToUpperCase(rawAttribute)}
+\tEnd If
 `;
                     }
                     // Variant types
@@ -240,6 +297,7 @@ Public Sub Init(${codeHeader})
                         codeInnerBody = 
 `\tIf isEmpty(${p.attribute}) Then
 \t\t${p.attribute} = a${_transformFirstCharToUpperCase(rawAttribute)}
+\tEnd If
 `;
                     }
                     
@@ -255,6 +313,52 @@ Public Sub Init(${codeHeader})
 `End Sub`;
         generatedCode += codeSignature + codeBody + codeFooter;
             
+    }
+
+    return generatedCode;
+}
+
+function createAttributesList(propsText) {
+    var properties = propsText.split('\r\n').filter(x => x.length > 2);
+    var propList = _extractPropertiesArray(properties);
+
+    var generatedCode = 
+`
+`;
+
+    var errorMessage = `Something went wrong (fix them before proceeding) in the following lines: `;
+    var errorList = propList.filter(p => !p.createStatus);
+
+    if (errorList.length) {
+        for(let i=0; i < errorList.length; i++) {
+            errorMessage += `\n${errorList[i].errorLine}`;
+        }
+        vscode.window.showErrorMessage(errorMessage);
+    }
+    else {
+        generatedCode += 
+`Private p_attributesList() As Variant
+
+Private Sub class_initialize()
+\tp_attributesList = Array(`;
+
+        for (let i = 0, j = 0; i < propList.length; i++, j++) {
+            generatedCode += `"${propList[i].attribute}"`;
+            if (i !== propList.length - 1) {
+                generatedCode += ', ';
+                // Breaking lines (VB editor in excel has character limits)
+                if (j == 10) {
+                    j = 0;
+                    generatedCode +=
+` _ 
+`;
+                }
+            }
+            else {
+                generatedCode += `)
+End Sub`;
+            }
+        }
     }
 
     return generatedCode;

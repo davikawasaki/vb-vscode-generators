@@ -1,8 +1,8 @@
 {
     "name": "VBGenerators",
-    "displayName": "Getters, Setters and Constructors' Generator for VB",
-    "description": "This extension generate VB constructors, getters and setters from a class attributes.",
-    "version": "1.0.0",
+    "displayName": "Getters, Setters, Attributes List and Constructors' Generator for VB",
+    "description": "This extension generate VB constructors, attributes list, getters and setters from a class attributes.",
+    "version": "1.1.0",
     "icon": "images/logo.png",
     "publisher": "davikawasaki",
     "repository": 
@@ -18,18 +18,23 @@
     ],
     "activationEvents": [
         "onCommand:extension.generateVBGetterAndSetters",
-        "onCommand:extension.generateVBConstructor"
+        "onCommand:extension.generateVBConstructor",
+        "onCommand:extension.generateVBAttributesList"
     ],
     "main": "./extension",
     "contributes": {
         "commands": [
             {
                 "command": "extension.generateVBGetterAndSetters",
-                "title": "Generate VB get and set methods"
+                "title": "VB getters and setters"
             },
             {
                 "command": "extension.generateVBConstructor",
-                "title": "Generate VB constructor method"
+                "title": "VB constructor"
+            },
+            {
+                "command": "extension.generateVBAttributesList",
+                "title": "VB class attributes list"
             }
         ]
     },
