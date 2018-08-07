@@ -1,0 +1,46 @@
+{
+    "name": "VBGenerators",
+    "displayName": "Getter and Setter´and Constructors Generator for VB",
+    "description": "This extension generate VB constructors, getters and setters from the class variable declarations.",
+    "version": "1.0.0",
+    "publisher": "davikawasaki",
+    "repository": 
+    {
+        "type": "git",
+        "url": "https://github.com/davikawasaki/vb-vscode-generators"
+    },
+    "engines": {
+        "vscode": "^1.20.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:extension.generateVBGetterAndSetters",
+        "onCommand:extension.generateVBConstructor"
+    ],
+    "main": "./extension",
+    "contributes": {
+        "commands": [
+            {
+                "command": "extension.generateVBGetterAndSetters",
+                "title": "Generate VB get and set methods"
+            },
+            {
+                "command": "extension.generateVBConstructor",
+                "title": "Generate VB constructor method"
+            }
+        ]
+    },
+    "scripts": {
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.6",
+        "eslint": "^4.11.0",
+        "@types/node": "^7.0.43",
+        "@types/mocha": "^2.2.42"
+    }
+}
