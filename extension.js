@@ -248,9 +248,12 @@ function createConstructor(propsText) {
                         // Breaking lines (VB editor in excel has character limits)
                         if (j == 10) {
                             j = 0;
-                            codeHeader +=
+                            // Don't break line if the next el is the last and is constant
+                            if (i !== propList.length - 2 && propList[i].constStatus) {
+                                codeHeader +=
 ` _ 
 `;
+                            }
                         }
                     }
                 }
@@ -287,7 +290,7 @@ Public Sub Init(${codeHeader})
                     }
                     else if (p.type == 'String') {
                         codeInnerBody = 
-`\tIf ${p.attribute} <> "" Then
+`\tIf ${p.attribute} = "" Then
 \t\t${p.attribute} = a${_transformFirstCharToUpperCase(rawAttribute)}
 \tEnd If
 `;
@@ -343,20 +346,26 @@ Private Sub class_initialize()
 \tp_attributesList = Array(`;
 
         for (let i = 0, j = 0; i < propList.length; i++, j++) {
-            generatedCode += `"${propList[i].attribute}"`;
-            if (i !== propList.length - 1) {
-                generatedCode += ', ';
-                // Breaking lines (VB editor in excel has character limits)
-                if (j == 10) {
-                    j = 0;
-                    generatedCode +=
+            let rawAttribute = propList[i].attribute.split('_')[1]
+            if (rawAttribute) {
+                generatedCode += `"${rawAttribute}"`;
+                if (i !== propList.length - 1) {
+                    generatedCode += ', ';
+                    // Breaking lines (VB editor in excel has character limits)
+                    if (j == 10) {
+                        j = 0;
+                        generatedCode +=
 ` _ 
 `;
+                    }
+                }
+                else {
+                    generatedCode += `)
+End Sub`;
                 }
             }
             else {
-                generatedCode += `)
-End Sub`;
+                vscode.window.showErrorMessage('Something went wrong! All properties name has to start with a p_! Change ' + propList[i].attribute + ' to p_ATTRIBUTENAME.');
             }
         }
     }
