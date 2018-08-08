@@ -4,7 +4,7 @@
     "description": "This extension generate VB constructors, attributes list, getters and setters from a class attributes.",
     "version": "1.1.2",
     "icon": "images/logo.png",
-    "publisher": "Davi Kawasaki",
+    "publisher": "davikawasaki",
     "repository": 
     {
         "type": "git",
