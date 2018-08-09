@@ -236,21 +236,23 @@ function createConstructor(propsText) {
         vscode.window.showErrorMessage(errorMessage);
     }
     else {
-        let codeHeader = '';
+        let codeSignature = 
+`
+Public Sub Init(`;
 
         for (var i = 0, j = 0; i < propList.length; i++, j++) {
             if (!propList[i].constStatus) {
                 let rawAttribute = propList[i].attribute.split('_')[1]
                 if (rawAttribute) {
-                    codeHeader += `a${_transformFirstCharToUpperCase(rawAttribute)} As ${propList[i].type}`;
+                    codeSignature += `a${_transformFirstCharToUpperCase(rawAttribute)} As ${propList[i].type}`;
                     if (i !== propList.length - 1) {
-                        codeHeader += ', ';
+                        codeSignature += ', ';
                         // Breaking lines (VB editor in excel has character limits)
-                        if (j == 10) {
+                        if (j == 5) {
                             j = 0;
                             // Don't break line if the next el is the last and is constant
-                            if (i !== propList.length - 2 && propList[i].constStatus) {
-                                codeHeader +=
+                            if (i !== propList.length - 2 && !propList[i+1].constStatus) {
+                                codeSignature +=
 ` _ 
 `;
                             }
@@ -264,15 +266,14 @@ function createConstructor(propsText) {
             else {
                 // Remove unnecessary comma and space
                 if (i == propList.length - 1) {
-                    if (codeHeader.substr(codeHeader.length - 2) == ", ") codeHeader = codeHeader.slice(0, codeHeader.length - 2);
+                    if (codeSignature.substr(codeSignature.length - 2) == ", ") codeSignature = codeSignature.slice(0, codeSignature.length - 2);
                 }
             }
         }
-        
-        let codeSignature = 
-`
-Public Sub Init(${codeHeader})
+
+        codeSignature += `)
 `;
+        
         let codeBody =
 ``;
         for (let p of propList) {
@@ -352,7 +353,7 @@ Private Sub class_initialize()
                 if (i !== propList.length - 1) {
                     generatedCode += ', ';
                     // Breaking lines (VB editor in excel has character limits)
-                    if (j == 10) {
+                    if (j == 5) {
                         j = 0;
                         generatedCode +=
 ` _ 
