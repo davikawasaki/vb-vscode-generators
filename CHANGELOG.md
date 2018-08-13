@@ -19,3 +19,7 @@
 
 ## v1.1.4
 - Bug fixes: Reduced the args to break a line (10 to 5) and now constructor breaks the line again (v1.1.2 crashed this subfeature)
+
+## v1.1.5
+- Feature: Attributes format list generation script
+- Bug fixes: Extra whitespace in the end of properties are now removed
