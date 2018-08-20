@@ -23,3 +23,6 @@
 ## v1.1.5
 - Feature: Attributes format list generation script
 - Bug fixes: Extra whitespace in the end of properties are now removed
+
+## v1.1.6
+- Subfeature: Generation with headers

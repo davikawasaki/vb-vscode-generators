@@ -233,6 +233,10 @@ function createGetterAndSetter(propsText) {
 
     var generatedCode = 
 `
+
+'***************************
+'*** GETTERS AND SETTERS ***
+'***************************
 `;
     var errorMessage = `Something went wrong (fix them before proceeding) in the following lines: `;
     var errorList = propList.filter(p => !p.createStatus);
@@ -287,6 +291,10 @@ function createConstructor(propsText) {
 
     var generatedCode = 
 `
+
+'************************
+'*** MAIN CONSTRUCTOR ***
+'************************
 `;
 
     var errorMessage = `Something went wrong (fix them before proceeding) in the following lines: `;
@@ -408,6 +416,10 @@ function createAttributesList(propsText) {
         generatedCode += 
 `Private p_attributesList() As Variant
 
+'***************************************************
+'*** CLASS ARRAY LIST INITIALIZATION WITH VALUES ***
+'***************************************************
+
 Private Sub class_initialize()
 \tp_attributesList = Array(`;
 
@@ -461,6 +473,10 @@ function createAttributesWithFormatList(propsText) {
 `Private p_attributesList() As Variant
 Private p_attributesFormatTypesList() As Variant
 Private p_attributesFormatValuesList() As Variant
+
+'***************************************************
+'*** CLASS ARRAY LIST INITIALIZATION WITH VALUES ***
+'***************************************************
 
 Private Sub class_initialize()
 \tp_attributesList = Array(`;
