@@ -2,7 +2,7 @@
     "name": "VBGenerators",
     "displayName": "Snippet Generators for VB",
     "description": "This extension generate VB constructors, attributes list, attributes with output format list, getters and setters from a class attributes.",
-    "version": "1.2.0",
+    "version": "1.1.6",
     "icon": "images/logo.png",
     "publisher": "davikawasaki",
     "repository": 
