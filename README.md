@@ -1,6 +1,6 @@
 # VB Generators
 ### Extension for Visual Studio Code 
-This extension generate VB constructors, class attributes list (with output format types and values), getters and setters from the VB class variable declarations.
+This extension generate VB constructors, getters/setters, class attributes list (with output format types and values) and singleton factories from the VB class variable declarations.
 
 [![Marketplace Version](https://vsmarketplacebadge.apphb.com/version/davikawasaki.VBGenerators.svg)](https://marketplace.visualstudio.com/items?itemName=davikawasaki.VBGenerators)
 [![Installs](https://vsmarketplacebadge.apphb.com/installs/davikawasaki.VBGenerators.svg)](https://marketplace.visualstudio.com/items?itemName=davikawasaki.VBGenerators)
@@ -19,17 +19,23 @@ This extension generate VB constructors, class attributes list (with output form
 ### Rendering Attributes List (with class initialization and output formats)
 ![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_attributes_list_with_formats_v1.1.6.gif)
 
-### Full Rendering Process (Generating attributes list with formats, then the constructor and finally the getters and setters)
-![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_full_process_v1.1.6.gif)
+### Rendering Singleton Factory from Class Attributes
+![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_singleton_factory_v1.2.0.gif)
+
+### Full Rendering Process (Generating attributes list with formats, then the constructor, the getters and setters and finally the singleton factory)
+![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_full_process_v1.2.0.gif)
 
 ## Authors
 
-* davikawasaki - Extension
-* afmicc - Code Reference
+* Davi Kawasaki
+
+## Inspiration
+
+* [Afmicc - Java Getter and Setter Generator Extension](https://github.com/afmicc/getter-setter-generator)
+* [Dkundel - VSCode New File Extension](https://github.com/dkundel/vscode-new-file)
 
 ## License
 MIT © [davikawasaki](https://github.com/davikawasaki)
-MIT © [afmicc](https://github.com/afmicc)
 
 ## Contribution
-Just send me a PR or an issue and we can improve the code :)
+Feel free to send me a PR or an issue to improve the code :)

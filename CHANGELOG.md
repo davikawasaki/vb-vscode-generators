@@ -26,3 +26,6 @@
 
 ## v1.1.6
 - Subfeature: Generation with headers
+
+## v1.2.0
+- Feature: Singleton factories from class attributes
