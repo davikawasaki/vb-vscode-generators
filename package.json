@@ -2,7 +2,7 @@
     "name": "VBGenerators",
     "displayName": "Snippet Generators for VB",
     "description": "This extension generate VB constructors, getters/setters, attributes list, attributes with output format list and singleton factories from class attributes.",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "icon": "images/logo.png",
     "publisher": "davikawasaki",
     "repository": {
@@ -51,6 +51,11 @@
         "postinstall": "node ./node_modules/vscode/bin/install",
         "test": "node ./node_modules/vscode/bin/test"
     },
+    "dependencies": {
+        "fs": "0.0.1-security",
+        "mkdirp": "^0.5.1",
+        "path": "^0.12.7"
+    },
     "devDependencies": {
         "@types/mocha": "^2.2.42",
         "@types/node": "^7.0.43",
@@ -58,7 +63,6 @@
         "fs": "0.0.1-security",
         "mkdirp": "^0.5.1",
         "path": "^0.12.7",
-        "typescript": "^2.6.1",
         "vscode": "^1.1.21"
     }
 }

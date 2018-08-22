@@ -29,3 +29,6 @@
 
 ## v1.2.0
 - Feature: Singleton factories from class attributes
+
+## v1.2.1
+- Bug fix: Adding mkdirp, fs and path npm dependencies to package.json to allow program-flow continuity
