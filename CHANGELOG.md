@@ -32,3 +32,7 @@
 
 ## v1.2.1
 - Bug fix: Adding mkdirp, fs and path npm dependencies to package.json to allow program-flow continuity
+
+## v1.2.2
+- Bug fixes: Use of regExp to check sentence structure + error handling in a more concise way
+- README updated with more detailed usage description

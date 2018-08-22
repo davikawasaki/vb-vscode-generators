@@ -16,10 +16,9 @@ function createGetterAndSetter(propsText) {
     var errorList = propList.filter(p => !p.createStatus);
 
     if (errorList.length) {
-        for(let i=0; i < errorList.length; i++) {
-            errorMessage += `\n${errorList[i].errorLine}`;
-        }
-        vscode.window.showErrorMessage(errorMessage);
+        let errObjMsg = miscLib.handleErrors(errorList);
+        if (errObjMsg.innerErrorsMessage !== "") vscode.window.showErrorMessage(errObjMsg.innerErrorsMessage);
+        else vscode.window.showErrorMessage(errorMessage + errObjMsg.innerErrorsLines);
     }
     else {
         for (let p of propList) {
@@ -75,10 +74,9 @@ function createConstructor(propsText) {
     var errorList = propList.filter(p => !p.createStatus);
 
     if (errorList.length) {
-        for(let i=0; i < errorList.length; i++) {
-            errorMessage += `\n${errorList[i].errorLine}`;
-        }
-        vscode.window.showErrorMessage(errorMessage);
+        let errObjMsg = miscLib.handleErrors(errorList);
+        if (errObjMsg.innerErrorsMessage !== "") vscode.window.showErrorMessage(errObjMsg.innerErrorsMessage);
+        else vscode.window.showErrorMessage(errorMessage + errObjMsg.innerErrorsLines);
     }
     else {
         let codeSignature = 
@@ -181,10 +179,9 @@ function createAttributesList(propsText) {
     var errorList = propList.filter(p => !p.createStatus);
 
     if (errorList.length) {
-        for(let i=0; i < errorList.length; i++) {
-            errorMessage += `\n${errorList[i].errorLine}`;
-        }
-        vscode.window.showErrorMessage(errorMessage);
+        let errObjMsg = miscLib.handleErrors(errorList);
+        if (errObjMsg.innerErrorsMessage !== "") vscode.window.showErrorMessage(errObjMsg.innerErrorsMessage);
+        else vscode.window.showErrorMessage(errorMessage + errObjMsg.innerErrorsLines);
     }
     else {
         generatedCode += 
@@ -237,10 +234,9 @@ function createAttributesWithFormatList(propsText) {
     var errorList = propList.filter(p => !p.createStatus);
 
     if (errorList.length) {
-        for(let i=0; i < errorList.length; i++) {
-            errorMessage += `\n${errorList[i].errorLine}`;
-        }
-        vscode.window.showErrorMessage(errorMessage);
+        let errObjMsg = miscLib.handleErrors(errorList);
+        if (errObjMsg.innerErrorsMessage !== "") vscode.window.showErrorMessage(errObjMsg.innerErrorsMessage);
+        else vscode.window.showErrorMessage(errorMessage + errObjMsg.innerErrorsLines);
     }
     else {
         generatedCode += 

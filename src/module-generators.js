@@ -18,13 +18,16 @@ async function createFactory(propsText, fileName, root, directory) {
 `;
 
     var errorMessage = `Something went wrong (fix them before proceeding) in the following lines: `;
+    var constList = propList.filter(p => p.constStatus);
     var errorList = propList.filter(p => !p.createStatus);
 
     if (errorList.length) {
-        for(let i=0; i < errorList.length; i++) {
-            errorMessage += `\n${errorList[i].errorLine}`;
-        }
-        vscode.window.showErrorMessage(errorMessage);
+        let errObjMsg = miscLib.handleErrors(errorList);
+        if (errObjMsg.innerErrorsMessage !== "") vscode.window.showErrorMessage(errObjMsg.innerErrorsMessage);
+        else vscode.window.showErrorMessage(errorMessage + errObjMsg.innerErrorsLines);
+    }
+    else if (constList.length === propList.length) {
+        vscode.window.showErrorMessage("All properties are constant and don't need to be instantiated! Factory won't be created.");
     }
     else {
         let codeSignature = 
@@ -107,19 +110,20 @@ Public Function Construct(`;
 \tSet Construct = ${fileName}Obj
 End Function`;
         generatedCode += codeBody;
+
+        try {
+            const creationStatus = await fileLib.createFile(`${root}\\${directory}\\${fileNameFactory}.bas`, generatedCode);
+            if (creationStatus) vscode.window.showInformationMessage(`Factory created/updated with success at ${directory} folder!`);
+            else vscode.window.showErrorMessage(`Unknown error at creating ${directory} folder!`);
+        } catch (err) {
+            if (err) {
+                if (typeof err === "string") vscode.window.showErrorMessage(err);
+                else vscode.window.showErrorMessage(`Error at creating ${directory} folder: folder access is not permitted or a full path was not provided.`);
+            }
+            else vscode.window.showErrorMessage(`Unknown error at creating ${directory} folder!`);
+        }
     }
 
-    try {
-        const creationStatus = await fileLib.createFile(`${root}\\${directory}\\${fileNameFactory}.bas`, generatedCode);
-        if (creationStatus) vscode.window.showInformationMessage(`Factory created/updated with success at ${directory} folder!`);
-        else vscode.window.showErrorMessage(`Unknown error at creating ${directory} folder!`);
-    } catch (err) {
-        if (err) {
-            if (typeof err === "string") vscode.window.showErrorMessage(err);
-            else vscode.window.showErrorMessage(`Error at creating ${directory} folder: folder access is not permitted or a full path was not provided.`);
-        }
-        else vscode.window.showErrorMessage(`Unknown error at creating ${directory} folder!`);
-    }
 }
 
 module.exports = {
