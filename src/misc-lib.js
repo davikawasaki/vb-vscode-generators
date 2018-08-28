@@ -40,26 +40,28 @@ function _checkExtractConstAndFormat(s) {
         errorMessage: null
     }
 
-    let re = new RegExp('(\".+\")');
-    let search = re.exec(s);
+    // Search first to check if there is format
+    let re = new RegExp("([^\']+)(\\s*\'.+)");
+    let searchFormat = re.exec(s);
 
-    if (search) {
-        re = new RegExp('(\".+\")(\\s*\'.+)');
-        let searchFormat = re.exec(s);
-    
-        // Get formatObj
+    if (searchFormat) {
+        // Get format details
         if (searchFormat && searchFormat[2].length > 3 && searchFormat[2].indexOf("'") !== -1) {
             let formatObj = _checkExtractFormat(searchFormat[2]);
             if (formatObj.errorCode !== -1) constObj.formatObj = formatObj;
         }
+    } else {
+        // If there is no format, search only for the value
+        re = new RegExp('(.+)');
+        let search = re.exec(s);
         
         if (search) {
             constObj.constStatus = true;
             constObj.constValue = search[1];
+        } else {
+            constObj.errorCode = -1;
+            constObj.errorMessage = "A Const value was not found in an attribute! Check it before running the generator.";
         }
-    } else {
-        constObj.errorCode = -1;
-        constObj.errorMessage = "A Const value was not found in an attribute! Check it before running the generator.";
     }
 
     return constObj;

@@ -8,8 +8,8 @@ async function createFactory(propsText, fileName, root, directory) {
     var fileNameFactory = `${fileName}Factory`;
 
 
-    var generatedCode = 
-`'****************************************************
+    var generatedCode = `
+'*****************************************************
 '*** @Module ${fileNameFactory}
 '*****************************************************
 '*** Construct singleton that calls ******************

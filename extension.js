@@ -80,13 +80,14 @@ function activate(context) {
         }
 
         try {
-            var attrList = classGen.createAttributesList(text);
+            var attrListObj = classGen.createAttributesList(text);
+            var attrListText = attrListObj.attributesProperty + attrListObj.generatedCode;
 
             editor.edit(
                 edit => editor.selections.forEach(
                   selection => 
                   {
-                    edit.insert(selection.end, attrList);
+                    edit.insert(selection.end, attrListText);
                   }
                 )
               );
@@ -111,13 +112,14 @@ function activate(context) {
         }
 
         try {
-            var attrList = classGen.createAttributesWithFormatList(text);
+            var attrListObj = classGen.createAttributesWithFormatList(text);
+            var attrListText = attrListObj.attributesProperty + attrListObj.generatedCode;
 
             editor.edit(
                 edit => editor.selections.forEach(
                   selection => 
                   {
-                    edit.insert(selection.end, attrList);
+                    edit.insert(selection.end, attrListText);
                   }
                 )
               );
@@ -156,16 +158,75 @@ function activate(context) {
         }
     });
 
+    let disposableFullProcess = vscode.commands.registerCommand('extension.generateVBFullClass', function() {
+        _generateFullClass(false);
+    });
+
+    let disposableFullProcessWithFactory = vscode.commands.registerCommand('extension.generateVBFullClassWithFactory', function() {
+        _generateFullClass(true);
+    });
+
     context.subscriptions.push(disposableGS);
     context.subscriptions.push(disposableConstructors);
     context.subscriptions.push(disposableAttributesList);
     context.subscriptions.push(disposableAttributeFormatList);
     context.subscriptions.push(disposableFactory);
+    context.subscriptions.push(disposableFullProcess);
+    context.subscriptions.push(disposableFullProcessWithFactory);
 }
-
-exports.activate = activate;
 
 // this method is called when your extension is deactivated
 function deactivate() { }
 
+function _generateFullClass(factory) {
+    let editor = vscode.window.activeTextEditor;
+    if (!editor)
+    return; // No open text editor
+
+    const selection = editor.selection;
+    let text = editor.document.getText(selection);
+
+    if (text.length < 1) {
+        vscode.window.showErrorMessage('No selected properties.');
+        return;
+    }
+
+    try {
+        let lines = ``;
+        let attrFormatListObj = classGen.createAttributesWithFormatList(text);
+        lines += `${attrFormatListObj.attributesProperty}`;
+        lines += `${attrFormatListObj.generatedCode}`;
+
+        text += `${attrFormatListObj.attributesProperty}`;
+        lines += `${classGen.createConstructor(text)}`;
+        lines += `${classGen.createGetterAndSetter(text)}`;
+
+        editor.edit(
+            edit => editor.selections.forEach(
+                selection => 
+                {
+                    edit.insert(selection.end, lines);
+                }
+            )
+        );
+        
+        if (factory) {
+            vscode.window.showInformationMessage('Full class created with success! Now generating the factory...');
+    
+            const filePath = editor.document.fileName;
+            let root = path.dirname(filePath);
+    
+            const ext = path.extname(filePath);
+            let fileName = path.basename(filePath, ext);
+    
+            moduleGen.createFactory(text, fileName, root, 'Factories');
+        } else vscode.window.showInformationMessage('Full class created with success!');
+    } 
+    catch (error) {
+        console.log(error);
+        vscode.window.showErrorMessage('Something went wrong! Try that the properties are in this format: "Private p_**** As String"');
+    }
+}
+
+exports.activate = activate;
 exports.deactivate = deactivate;

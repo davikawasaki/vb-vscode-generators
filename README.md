@@ -1,6 +1,6 @@
 # VB Generators
 ## Extension for Visual Studio Code 
-This extension generate VB constructors, getters/setters, class attributes list (with output format types and values) and singleton factories from the VB class variable declarations.
+This extension generate VB constructors, getters/setters, class attributes list (with output format types and values) and singleton factories from the VB class variable declarations. You can render them all in a single command too! :)
 
 [![Marketplace Version](https://vsmarketplacebadge.apphb.com/version/davikawasaki.VBGenerators.svg)](https://marketplace.visualstudio.com/items?itemName=davikawasaki.VBGenerators)
 [![Installs](https://vsmarketplacebadge.apphb.com/installs/davikawasaki.VBGenerators.svg)](https://marketplace.visualstudio.com/items?itemName=davikawasaki.VBGenerators)
@@ -18,6 +18,7 @@ This extension generate VB constructors, getters/setters, class attributes list 
     - [Rendering Attributes List with class initialization and output formats](#rendering-attributes-list-with-class-initialization-and-output-formats)
     - [Rendering Singleton Factory from Class Attributes](#rendering-singleton-factory-from-class-attributes)
     - [Full Rendering Process](#full-rendering-process)
+    - [Full Rendering Process With Factory](#full-rendering-process-with-factory)
 - [Authors and Collaborators](#authors-and-collaborators)
 - [Inspirations](#inspirations)
 - [License](#license)
@@ -33,6 +34,8 @@ $ VB constructor
 $ VB class attribute list
 $ VB class attribute list with output format list
 $ VB factory from class attributes
+$ VB full class
+$ VB full class with factory
 ```
 
 ### Attributes Structure Recommendations
@@ -148,7 +151,10 @@ End Sub
 ![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_singleton_factory_v1.2.0.gif)
 
 ### Full Rendering Process
-![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_full_process_v1.2.0.gif)
+![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_full_process_v1.3.0.gif)
+
+### Full Rendering Process with Factory
+![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_full_process_with_factory_v1.3.0.gif)
 
 ## Authors and Collaborators
 

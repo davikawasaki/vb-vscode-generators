@@ -2,7 +2,7 @@
     "name": "VBGenerators",
     "displayName": "Snippet Generators for VB",
     "description": "This extension generate VB constructors, getters/setters, attributes list, attributes with output format list and singleton factories from class attributes.",
-    "version": "1.2.2",
+    "version": "1.3.0",
     "icon": "images/logo.png",
     "publisher": "davikawasaki",
     "repository": {
@@ -20,7 +20,9 @@
         "onCommand:extension.generateVBConstructor",
         "onCommand:extension.generateVBAttributesList",
         "onCommand:extension.generateVBAttributesWithFormatList",
-        "onCommand:extension.generateVBFactory"
+        "onCommand:extension.generateVBFactory",
+        "onCommand:extension.generateVBFullClass",
+        "onCommand:extension.generateVBFullClassWithFactory"
     ],
     "main": "./extension",
     "contributes": {
@@ -44,6 +46,14 @@
             {
                 "command": "extension.generateVBFactory",
                 "title": "VB factory from class attributes"
+            },
+            {
+                "command": "extension.generateVBFullClass",
+                "title": "VB full class"
+            },
+            {
+                "command": "extension.generateVBFullClassWithFactory",
+                "title": "VB full class with factory"
             }
         ]
     },
