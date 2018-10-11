@@ -148,13 +148,13 @@ End Sub
 ![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_attributes_list_with_formats_v1.1.6.gif)
 
 ### Rendering Singleton Factory from Class Attributes
-![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_singleton_factory_v1.2.0.gif)
+![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_singleton_factory_v1.3.1.gif)
 
 ### Full Rendering Process
 ![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_full_process_v1.3.0.gif)
 
 ### Full Rendering Process with Factory
-![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_full_process_with_factory_v1.3.0.gif)
+![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_full_process_with_factory_v1.3.1.gif)
 
 ## Authors and Collaborators
 

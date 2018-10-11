@@ -40,3 +40,6 @@
 ## v1.3.0
 - Bug fixes: Changed breaking lines method in the class generators and regex evaluation cases for constant properties with format
 - Features: Full class generator with or without factory
+
+## v1.3.1
+- Subfeatures: Empty constructor + author description in factory generated file

@@ -1,5 +1,6 @@
 const miscLib = require('./misc-lib')
 const fileLib = require('./file-lib')
+const moment = require('moment')
 const vscode = require('vscode')
 
 async function createFactory(propsText, fileName, root, directory) {
@@ -14,6 +15,11 @@ async function createFactory(propsText, fileName, root, directory) {
 '*****************************************************
 '*** Construct singleton that calls ******************
 '*** Init instantiating class fn. ********************
+'*****************************************************
+'***  Author: <AUTHOR>
+'***  Created: ${moment().format("DD/MM/YYYY")}
+'***  Last Update: ${moment().format("DD/MM/YYYY")}
+'***  Version: 1.0.0
 '*****************************************************
 `;
 
@@ -30,8 +36,57 @@ async function createFactory(propsText, fileName, root, directory) {
         vscode.window.showErrorMessage("All properties are constant and don't need to be instantiated! Factory won't be created.");
     }
     else {
+        /** @fn Empty Constructor **/
+        let codeEmptySignature = 
+`
+Public Function EmptyConstruct() As ${fileName}`;
+        generatedCode += codeEmptySignature
+        let codeEmptyBody =
+`
+\tSet ${fileName}Obj = New ${fileName}
+\t${fileName}Obj.Init `;
+
+        for (var i = 0, j = 0; i < propList.length; i++, j++) {
+            if (!propList[i].constStatus) {
+                let rawAttribute = propList[i].attribute.split('_')[1]
+                if (rawAttribute) {
+                    codeEmptyBody += `a${miscLib.transformFirstCharToUpperCase(rawAttribute)}:=""`;
+
+                    if (i !== propList.length - 1) {
+                        codeEmptyBody += ', ';
+                        // Breaking lines (VB editor in excel has character limits)
+                        if (j == 5) {
+                            j = 0;
+                            // Don't break line if the next el is the last and is constant
+                            if (i !== propList.length - 2 && !propList[i+1].constStatus) {
+                                codeEmptyBody +=
+`_ 
+`;
+                            }
+                        }
+                    }
+                }
+                else {
+                    console.error('Error in property:',propList[i].attribute)
+                    vscode.window.showErrorMessage('Something went wrong! All properties name has to start with a p_! Change ' + propList[i].attribute + ' to p_ATTRIBUTENAME.');
+                }
+            } else {
+                // Remove unnecessary comma and space
+                if (i == propList.length - 1) {
+                    if (codeEmptyBody.substr(codeEmptyBody.length - 2) == ", ") codeEmptyBody = codeEmptyBody.slice(0, codeEmptyBody.length - 2);
+                }
+            }
+        }
+
+        codeEmptyBody += `
+\tSet EmptyConstruct = ${fileName}Obj
+End Function`;
+        generatedCode += codeEmptyBody;
+
+        /** @fn Constructor **/
         let codeSignature = 
 `
+
 Public Function Construct(`;
 
         for (var i = 0, j = 0; i < propList.length; i++, j++) {
