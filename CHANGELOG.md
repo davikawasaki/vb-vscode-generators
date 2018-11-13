@@ -43,3 +43,7 @@
 
 ## v1.3.1
 - Subfeatures: Empty constructor + author description in factory generated file
+
+## v1.4.0
+- Subfeatures: FORMAT colors available (background and foreground)
+- Bug fixes: Break code if some error pops up instead of emitting success messages from extension.js main subscriptions
