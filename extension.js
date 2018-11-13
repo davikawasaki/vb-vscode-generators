@@ -18,16 +18,18 @@ function activate(context) {
         }
 
         try {
-            var getterAndSetter = classGen.createGetterAndSetter(text);
+            var getterAndSetterObj = classGen.createGetterAndSetter(text);
 
-            editor.edit(
-                edit => editor.selections.forEach(
-                  selection => 
-                  {
-                    edit.insert(selection.end, getterAndSetter);
-                  }
-                )
-              );
+            if (!getterAndSetterObj.errorFlag) {
+                editor.edit(
+                    edit => editor.selections.forEach(
+                      selection => 
+                      {
+                        edit.insert(selection.end, getterAndSetterObj.generatedCode);
+                      }
+                    )
+                );
+            }
         } 
         catch (error) {
             console.log(error);
@@ -49,16 +51,18 @@ function activate(context) {
         }
 
         try {
-            var constructor = classGen.createConstructor(text);
+            var constructorObj = classGen.createConstructor(text);
 
-            editor.edit(
-                edit => editor.selections.forEach(
-                  selection => 
-                  {
-                    edit.insert(selection.end, constructor);
-                  }
-                )
-              );
+            if (!constructorObj.errorFlag) {
+                editor.edit(
+                    edit => editor.selections.forEach(
+                      selection => 
+                      {
+                        edit.insert(selection.end, constructorObj.generatedCode);
+                      }
+                    )
+                );
+            }
         } 
         catch (error) {
             console.log(error);
@@ -81,16 +85,18 @@ function activate(context) {
 
         try {
             var attrListObj = classGen.createAttributesList(text);
-            var attrListText = attrListObj.attributesProperty + attrListObj.generatedCode;
-
-            editor.edit(
-                edit => editor.selections.forEach(
-                  selection => 
-                  {
-                    edit.insert(selection.end, attrListText);
-                  }
-                )
-              );
+            if (!attrListObj.errorFlag) {
+                var attrListText = attrListObj.attributesProperty + attrListObj.generatedCode;
+    
+                editor.edit(
+                    edit => editor.selections.forEach(
+                      selection => 
+                      {
+                        edit.insert(selection.end, attrListText);
+                      }
+                    )
+                );
+            }
         } 
         catch (error) {
             console.log(error);
@@ -113,16 +119,19 @@ function activate(context) {
 
         try {
             var attrListObj = classGen.createAttributesWithFormatList(text);
-            var attrListText = attrListObj.attributesProperty + attrListObj.generatedCode;
 
-            editor.edit(
-                edit => editor.selections.forEach(
-                  selection => 
-                  {
-                    edit.insert(selection.end, attrListText);
-                  }
-                )
-              );
+            if (!attrListObj.errorFlag) {
+                var attrListText = attrListObj.attributesProperty + attrListObj.generatedCode;
+    
+                editor.edit(
+                    edit => editor.selections.forEach(
+                      selection => 
+                      {
+                        edit.insert(selection.end, attrListText);
+                      }
+                    )
+                );
+            }
         } 
         catch (error) {
             console.log(error);
@@ -194,12 +203,24 @@ function _generateFullClass(factory) {
     try {
         let lines = ``;
         let attrFormatListObj = classGen.createAttributesWithFormatList(text);
-        lines += `${attrFormatListObj.attributesProperty}`;
-        lines += `${attrFormatListObj.generatedCode}`;
+        if (attrFormatListObj.errorFlag) return;
+        else {
+            lines += `${attrFormatListObj.attributesProperty}`;
+            lines += `${attrFormatListObj.generatedCode}`;
+            text += `${attrFormatListObj.attributesProperty}`;
+        }
 
-        text += `${attrFormatListObj.attributesProperty}`;
-        lines += `${classGen.createConstructor(text)}`;
-        lines += `${classGen.createGetterAndSetter(text)}`;
+        let constructorObj = classGen.createConstructor(text);
+        if (constructorObj.errorFlag) return;
+        else {
+            lines += `${constructorObj.generatedCode}`;
+        }
+
+        let getterSetterObj = classGen.createGetterAndSetter(text);
+        if (getterSetterObj.errorFlag) return;
+        else {
+            lines += getterSetterObj.generatedCode;
+        }
 
         editor.edit(
             edit => editor.selections.forEach(
