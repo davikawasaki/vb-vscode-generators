@@ -47,7 +47,7 @@ function _checkExtractConstAndFormat(s) {
     if (searchFormat) {
         // Get format details
         if (searchFormat && searchFormat[2].length > 3 && searchFormat[2].indexOf("'") !== -1) {
-            let formatObj = _checkExtractFormat(searchFormat[2]);
+            let formatObj = _checkExtractFormats(searchFormat[2]);
             if (formatObj.errorCode !== -1) constObj.formatObj = formatObj;
         }
     } else {
@@ -67,18 +67,61 @@ function _checkExtractConstAndFormat(s) {
     return constObj;
 }
 
-// i.e " ' FORMAT NumberFormat VALUE @"
-function _checkExtractFormat(s) {
+// i.e " ' FORMAT NumberFormat VALUE @ FORMATCOLOR BGCOLOR vbRed FGCOLOR vbBlack"
+//     " ' FORMAT NumberFormat VALUE @"
+//     " ' FORMATCOLOR BGCOLOR vbRed FGCOLOR vbBlack"
+function _checkExtractFormats(s) {
     s = _removeSpaceAndExtraChar(s, true, true, "\t", true, false);
 
     let formatObj = {
         formatType: "",
         formatValue: "",
+        formatBgColor: "",
+        formatFgColor: "",
         errorCode: null,
         errorMessage: null
     }
 
-    let re = new RegExp("(\'\\s*)([A-Z]{6})(\\s+)([A-Za-z]+)(\\s+)([A-Z]{5})(\\s+)(.+\\s*)");
+    if (s.includes("FORMAT ") && s.includes("FORMATCOLOR ")) {
+        let _splitFormatColor = s.split("FORMATCOLOR ");
+        if (_splitFormatColor.length !== 2) {
+            formatObj.errorCode = -1;
+            formatObj.errorMessage = "A FORMAT string constructor has more than two FORMATCOLOR string constructors inside! Check it before running the generator.";
+        } else if (!_splitFormatColor[0].includes("FORMAT ")) {
+            formatObj.errorCode = -1;
+            formatObj.errorMessage = "A FORMAT string constructor has a FORMATCOLOR but does not have a FORMAT constructor! Check it before running the generator.";
+        } else {
+            formatObj = _extractTypeValueFormat(_splitFormatColor[0], formatObj);
+            formatObj = _extractColorFormat(`FORMATCOLOR ${_splitFormatColor[1]}`, formatObj);
+        }
+    } else if (s.includes("FORMAT ") && !s.includes("FORMATCOLOR ")) {
+        if (s.includes("BGCOLOR") || s.includes("FGCOLOR")) {
+            formatObj.errorCode = -1;
+            formatObj.errorMessage = "A FORMATCOLOR string constructor wasn't constructed properly! Check it before running the generator.";    
+        } else {
+            formatObj = _extractTypeValueFormat(s, formatObj);
+        }
+    } else if (s.includes("FORMATCOLOR ") && !s.includes("FORMAT ")) {
+        if (s.includes("BGCOLOR") && s.includes("FGCOLOR")) {
+            formatObj = _extractColorFormat(s, formatObj);
+        } else {
+            formatObj.errorCode = -1;
+            formatObj.errorMessage = "A FORMATCOLOR string constructor wasn't constructed properly! Check it before running the generator.";    
+        }
+    } else {
+        formatObj.errorCode = -1;
+        formatObj.errorMessage = "A FORMATCOLOR string constructor wasn't constructed properly! Check it before running the generator.";
+    }
+
+    return formatObj;
+}
+
+function _extractTypeValueFormat(s, formatObj) {
+    s = _removeSpaceAndExtraChar(s, true, true, "\t", true, false);
+
+    // i.e " ' FORMAT NumberFormat VALUE @ "
+    // let re = new RegExp("(\'\\s*)([A-Z]{6})(\\s+)([A-Za-z]+)(\\s+)([A-Z]{5})(\\s+)(.+\\s*)");
+    let re = new RegExp("(\\s*)([A-Z]{6})(\\s+)([A-Za-z]+)(\\s+)([A-Z]{5})(\\s+)(.+\\s*)");
     let search = re.exec(s);
 
     if (search) {
@@ -125,6 +168,65 @@ function _checkExtractFormat(s) {
     return formatObj;
 }
 
+function _extractColorFormat(s, formatObj) {
+    s = _removeSpaceAndExtraChar(s, true, true, "\t", true, false);
+    
+    // i.e "FORMATCOLOR BGCOLOR 1 FGCOLOR vbBlack"
+    let re = new RegExp("(\\s*)([A-Z]{11})(\\s+)([A-Z]{7})(\\s+)([A-Za-z0-9]+)(\\s+)([A-Z]{7})(\\s+)([A-Za-z]+)");
+    let search = re.exec(s);
+
+    let reVbConstants = new RegExp("(vb)([A-Z]{1})([a-z]+)");
+
+    if (search) {
+        // Accepts only NumberFormat and NumberFormatLocal
+        if (search[2] && search[2] !== "FORMATCOLOR") {
+            formatObj.errorCode = 2;
+            formatObj.errorMessage = "There is a typo in the FORMATCOLOR label (" + search[2] + ") ! Check it before running the generator.";
+        }
+        else if (search[4] && search[4] !== "BGCOLOR") {
+            formatObj.errorCode = 4;
+            formatObj.errorMessage = "There is a typo in the BGCOLOR label (" + search[4] + ") ! Check it before running the generator.";
+        }
+        else if (search[6] && !_isNumber(search[6])) {
+            formatObj.errorCode = 6;
+            formatObj.errorMessage = "A FORMATCOLOR BGCOLOR value needs to be a number from the palette colors! Check it before running the generator.";
+        }
+        else if (search[6] && _isNumber(search[6]) && (parseInt(search[6]) < 0 || parseInt(search[6]) > 56)) {
+            formatObj.errorCode = 6;
+            formatObj.errorMessage = "A FORMATCOLOR BGCOLOR value needs to be a number from the range of palette colors! Check it before running the generator.";
+        }
+        else if (search[6] && search[6].search("\"") !== -1) {
+            formatObj.errorCode = 6;
+            formatObj.errorMessage = "A FORMATCOLOR FGCOLOR value can not have \"! Remove them before running the generator.";
+        }
+        else if (search[8] && search[8] !== "FGCOLOR") {
+            formatObj.errorCode = 8;
+            formatObj.errorMessage = "There is a typo in the FGCOLOR label (" + search[8] + ") ! Check it before running the generator.";
+        }
+        else if (search[10] && !reVbConstants.exec(search[10])) {
+            formatObj.errorCode = 10;
+            formatObj.errorMessage = "A FORMATCOLOR FGCOLOR value needs to be a vb[A-Z]**** type (i.e. vbRed, vbBlack, etc)! Check it before running the generator.";
+        }
+        else if (search[10] && search[10].search("\"") !== -1) {
+            formatObj.errorCode = 10;
+            formatObj.errorMessage = "A FORMATCOLOR FGCOLOR value can not have \"! Remove them before running the generator.";
+        }
+        else if (search[6] && search[10]) {
+            formatObj.formatBgColor = search[6];
+            formatObj.formatFgColor = search[10];
+        }
+        else {
+            formatObj.errorCode = 1;
+            formatObj.errorMessage = "A FORMATCOLOR values were not provided! Check them before running the generator.";
+        }
+    } else {
+        formatObj.errorCode = -1;
+        formatObj.errorMessage = "A FORMATCOLOR string constructor was not found in an attribute! Check it before running the generator.";
+    }
+
+    return formatObj;
+}
+
 function extractPropertiesArray(props) {
     let extProps = [];
     for (let p of props) {
@@ -134,6 +236,8 @@ function extractPropertiesArray(props) {
             rawAttribute: "",
             formatType: "",
             formatValue: "",
+            formatBgColor: "",
+            formatFgColor: "",
             constStatus: false,
             createStatus: false,
             errorLine: null,
@@ -225,14 +329,17 @@ function extractPropertiesArray(props) {
             propertyValue = _removeSpaceAndExtraChar(propertyValue, true, true, null, false, false);
 
             if (formatSplit.length === 2) {
-                let formatValue = "'" + formatSplit[1];
+                // let formatValue = "'" + formatSplit[1];
+                let formatValue = formatSplit[1];
                 formatValue = _removeSpaceAndExtraChar(formatValue, true, true, null, false, false);
 
-                let formatObj = _checkExtractFormat(formatValue);
+                let formatObj = _checkExtractFormats(formatValue);
 
                 if (!formatObj.errorCode) {
                     propObj.formatType = formatObj.formatType;
                     propObj.formatValue = formatObj.formatValue;
+                    propObj.formatBgColor = formatObj.formatBgColor;
+                    propObj.formatFgColor = formatObj.formatFgColor;
                     propObj.createStatus = true;
                 } else {
                     propObj.errorLine = p;
@@ -289,6 +396,10 @@ function extractPropertiesArray(props) {
     }
     
     return extProps;
+}
+
+function _isNumber(n) {
+    return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
 module.exports = {
