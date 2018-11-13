@@ -53,21 +53,36 @@ Private Const p_attr As String = "ATTRIBUTE"
  ' FORMAT NumberFormat VALUE yyyy-mm-dd
  ' FORMAT NumberFormat VALUE #####0.#0
 ```
+3\. Formatting cell colors (needs the **FORMATCOLOR**, **BGCOLOR** and **FGCOLOR** keywords, as well as [numeric values for background color](http://dmcritchie.mvps.org/excel/colors.htm) - 0 to 56 - and [VB constant colors for foreground color](http://access-excel.tips/excel-vba-color-code-list/) - vbWhite, vbRed, vbBlack, etc):
 
-3\. The number format can be used with a **Const** attribute as well:
+```vb
+ ' FORMATCOLOR BGCOLOR 1 FGCOLOR vbWhite
+ ' FORMATCOLOR BGCOLOR 56 FGCOLOR vbBlack
+ ' FORMAT NumberFormat VALUE #####0.#0 FORMATCOLOR BGCOLOR 56 FGCOLOR vbBlack
+```
+
+4\. Formatting cell cases can be combined (format type and colors):
+
+```vb
+ ' FORMAT NumberFormat VALUE #####0.#0 FORMATCOLOR BGCOLOR 56 FGCOLOR vbBlack
+```
+
+5\. The number format can be used with a **Const** attribute as well:
 
 ```vb
 Private Const p_attr As String = "ATTRIBUTE" ' FORMAT NumberFormat VALUE @ 
+Private Const p_attr As String = "ATTRIBUTE" ' FORMATCOLOR BGCOLOR 56 FGCOLOR vbBlack
+Private Const p_attr As String = "ATTRIBUTE" ' FORMAT NumberFormat VALUE @ FORMATCOLOR BGCOLOR 56 FGCOLOR vbBlack
 ```
 
-4\. In case you do not say which is the type of the attribute, the extension will understand in all generators that the attribute is a **Variant** type, for instance:
+6\. In case you do not say which is the type of the attribute, the extension will understand in all generators that the attribute is a **Variant** type, for instance:
 
 ```vb
 Private p_attr As
 Private p_attr
 ```
 
-5\. The following cases will output errors, so avoid them at all costs:
+7\. The following cases will output errors, so avoid them at all costs:
 
 ```vb
 ' *** No Public/Private declaration
@@ -79,9 +94,15 @@ Private Const p_attr As String = ""
 Private p_attr As String
 ' *** FORMET instead of FORMAT, TextFormat not acceptable, VALUES instead of VALUE, " usages are not allowed in the format value
 Private p_attr As String ' FORMET TextFormat VALUES "@"
+' *** FORMETCOLOUR instead of FORMATCOLOR, BG_COLOR instead of BGCOLOR, vbblack instead vbBlack, " usages are not allowed in the BGCOLOR value (needs to be numeric)
+Private p_attr As String ' FORMETCOLOUR BG_COLOR "1" FG_COLOR vbblack
+' *** BGCOLOR and FGCOLOR without values
+Private p_attr As String ' FORMATCOLOR BGCOLOR FGCOLOR
+' *** BGCOLOR and FGCOLOR inverted positions, BGCOLOR value out of range (0-56)
+Private p_attr As String ' FORMATCOLOR FGCOLOR vbBlack BGCOLOR 57
 ```
 
-6\. Factory cases will output the file (if no errors are emitted or there are at least one non-constant attribute) in a Factories/ folder. You may be enquired to approve an override in case the specific factory file already exists in the folder.
+8\. Factory cases will output the file (if no errors are emitted or there are at least one non-constant attribute) in a Factories/ folder. You may be enquired to approve an override in case the specific factory file already exists in the folder.
 
 ### Attribute list with format output
 
@@ -136,25 +157,25 @@ End Sub
 
 ## Examples
 ### Rendering Class Constructor
-![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_constructor_v1.1.6.gif)
+![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_constructor_v1.4.0.gif)
 
 ### Rendering Attributes Getters and Setters
-![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_getters_setters_v1.1.6.gif)
+![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_getters_setters_v1.4.0.gif)
 
 ### Rendering Attributes List with class initialization
-![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_attributes_list_v1.1.6.gif)
+![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_attributes_list_v1.4.0.gif)
 
 ### Rendering Attributes List with class initialization and output formats
-![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_attributes_list_with_formats_v1.1.6.gif)
+![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_attributes_list_with_formats_v1.4.0.gif)
 
 ### Rendering Singleton Factory from Class Attributes
-![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_singleton_factory_v1.3.1.gif)
+![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_singleton_factory_v1.4.0.gif)
 
 ### Full Rendering Process
-![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_full_process_v1.3.0.gif)
+![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_full_process_v1.4.0.gif)
 
 ### Full Rendering Process with Factory
-![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_full_process_with_factory_v1.3.1.gif)
+![how use](https://raw.githubusercontent.com/davikawasaki/vb-vscode-generators/master/readme/render_full_process_with_factory_v1.4.0.gif)
 
 ## Authors and Collaborators
 
