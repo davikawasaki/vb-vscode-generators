@@ -2,6 +2,7 @@ const vscode = require('vscode');
 const miscLib = require('./misc-lib')
 
 function createGetterAndSetter(propsText) {
+    let errorFlag = false;
     var properties = propsText.split('\r\n').filter(x => {
         return x.length > 2
     });
@@ -12,6 +13,7 @@ function createGetterAndSetter(propsText) {
     var errorList = propList.filter(p => !p.createStatus);
 
     if (errorList.length) {
+        errorFlag = true;
         let errObjMsg = miscLib.handleErrors(errorList);
         if (errObjMsg.innerErrorsMessage !== "") vscode.window.showErrorMessage(errObjMsg.innerErrorsMessage);
         else vscode.window.showErrorMessage(errorMessage + errObjMsg.innerErrorsLines);
@@ -37,10 +39,11 @@ function createGetterAndSetter(propsText) {
         }
     }
 
-    return generatedCode;
+    return { generatedCode, errorFlag };
 }
 
 function createConstructor(propsText) {
+    let errorFlag = false;
     var properties = propsText.split('\r\n').filter(x => x.length > 2);
     var propList = miscLib.extractPropertiesArray(properties);
 
@@ -50,6 +53,7 @@ function createConstructor(propsText) {
     var errorList = propList.filter(p => !p.createStatus);
 
     if (errorList.length) {
+        errorFlag = true;
         let errObjMsg = miscLib.handleErrors(errorList);
         if (errObjMsg.innerErrorsMessage !== "") vscode.window.showErrorMessage(errObjMsg.innerErrorsMessage);
         else vscode.window.showErrorMessage(errorMessage + errObjMsg.innerErrorsLines);
@@ -121,7 +125,7 @@ function createConstructor(propsText) {
             
     }
 
-    return generatedCode;
+    return { generatedCode, errorFlag };
 }
 
 function createAttributesList(propsText) {
@@ -135,7 +139,10 @@ function createAttributesList(propsText) {
     var errorMessage = `Something went wrong (fix them before proceeding) in the following lines: `;
     var errorList = propList.filter(p => !p.createStatus);
 
+    var errorFlag = false;
+
     if (errorList.length) {
+        errorFlag = true;
         let errObjMsg = miscLib.handleErrors(errorList);
         if (errObjMsg.innerErrorsMessage !== "") vscode.window.showErrorMessage(errObjMsg.innerErrorsMessage);
         else vscode.window.showErrorMessage(errorMessage + errObjMsg.innerErrorsLines);
@@ -165,21 +172,24 @@ function createAttributesList(propsText) {
         }
     }
 
-    return { generatedCode, attributesProperty };
+    return { generatedCode, attributesProperty, errorFlag };
 }
 
 function createAttributesWithFormatList(propsText) {
     var properties = propsText.split('\r\n').filter(x => x.length > 2);
     var propList = miscLib.extractPropertiesArray(properties);
 
-    var attributesProperty = `\r\nPrivate p_attributesList() As Variant\r\nPrivate p_attributesFormatTypesList() As Variant\r\nPrivate p_attributesFormatValuesList() As Variant\r\n`;
+    var attributesProperty = `\r\nPrivate p_attributesList() As Variant\r\nPrivate p_attributesFormatTypesList() As Variant\r\nPrivate p_attributesFormatValuesList() As Variant\r\nPrivate p_attributesFormatBgColorValuesList() As Variant\r\nPrivate p_attributesFormatFgColorValuesList() As Variant\r\n`;
 
     var generatedCode = `\r\n`;
 
     var errorMessage = `Something went wrong (fix them before proceeding) in the following lines: `;
     var errorList = propList.filter(p => !p.createStatus);
 
+    var errorFlag = false;
+
     if (errorList.length) {
+        errorFlag = true;
         let errObjMsg = miscLib.handleErrors(errorList);
         if (errObjMsg.innerErrorsMessage !== "") vscode.window.showErrorMessage(errObjMsg.innerErrorsMessage);
         else vscode.window.showErrorMessage(errorMessage + errObjMsg.innerErrorsLines);
@@ -235,12 +245,49 @@ function createAttributesWithFormatList(propsText) {
                 }
             }
             else {
+                generatedCode += `)`;
+            }
+        }
+
+        generatedCode += `\r\n\tp_attributesFormatBgColorValuesList = Array(`;
+
+        for (let i = 0, j = 0; i < propList.length; i++, j++) {
+            // generatedCode += `"${propList[i].formatBgColor}"`;
+            if (propList[i].formatBgColor === "") generatedCode += `""`;
+            else generatedCode += `${propList[i].formatBgColor}`;
+            if (i !== propList.length - 1) {
+                generatedCode += ', ';
+                // Breaking lines (VB editor in excel has character limits)
+                if (j == 5) {
+                    j = 0;
+                    generatedCode += ` _ \r\n`;
+                }
+            }
+            else {
+                generatedCode += `)`;
+            }
+        }
+
+        generatedCode += `\r\n\tp_attributesFormatFgColorValuesList = Array(`;
+
+        for (let i = 0, j = 0; i < propList.length; i++, j++) {
+            generatedCode += `"${propList[i].formatFgColor}"`;
+            if (i !== propList.length - 1) {
+                generatedCode += ', ';
+                // Breaking lines (VB editor in excel has character limits)
+                if (j == 5) {
+                    j = 0;
+                    generatedCode += ` _ \r\n`;
+                }
+            }
+            else {
                 generatedCode += `)\r\nEnd Sub`;
             }
         }
+
     }
 
-    return { generatedCode, attributesProperty };
+    return { generatedCode, attributesProperty, errorFlag };
 }
 
 module.exports = {
